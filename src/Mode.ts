@@ -19,7 +19,6 @@ export default class Mode implements ToolMode {
         },
     }];
     private interaction?: InteractionManager<Label> = undefined;
-    private timeout?: NodeJS.Timeout = undefined;
 
     private createLabel (x: number, y: number): Label {
         return buildLabel()
@@ -43,18 +42,13 @@ export default class Mode implements ToolMode {
             label.text.plainText = `${event.pointerPosition.x}, ${event.pointerPosition.y}`;
             label.position = { x: event.pointerPosition.x, y: event.pointerPosition.y };
         });
+    }
 
-        // Remove the label after a few seconds.  We have no way to know when the tool was deactivated, so we just use this.
-        if (this.timeout)
-            clearTimeout(this.timeout);
-
-        this.timeout = setTimeout(() => {
-            if (this.interaction) {
-                const [_, stop] = this.interaction;
-                stop();
-                this.interaction = undefined;
-                this.timeout = undefined;
-            }
-        }, 3000);
+    onDeactivate (context: ToolContext) {
+        if (this.interaction) {
+            const [_, stop] = this.interaction;
+            stop();
+            this.interaction = undefined;
+        }
     }
 }
